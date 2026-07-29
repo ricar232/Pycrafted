@@ -121,9 +121,7 @@ function Hero({ openContact, t }) {
             <a className="dark-button" href="#servicios">{t.hero.ctaServices} <Icon name="grid" size={18} /></a>
           </div>
           <div className="client-proof">
-            <div className="avatars" aria-hidden="true">
-              <span>R</span><span>M</span><span>A</span><span>L</span><span>+50</span>
-            </div>
+            <div className="trust-mark" aria-hidden="true"><Icon name="shield" size={18} /></div>
             <p>{t.hero.clientsLine1}<br />{t.hero.clientsLine2}</p>
           </div>
         </div>
@@ -217,10 +215,12 @@ function Projects({ openContact, t }) {
       </div>
 
       <div className="projects-carousel-wrap">
-        <button className="carousel-arrow carousel-prev" type="button" onClick={() => go(-1)} aria-label={t.projects.prevAria}>
-          <Icon name="chevronLeft" size={24} />
-        </button>
-        <div className="projects-grid">
+        {projects.length > 1 && (
+          <button className="carousel-arrow carousel-prev" type="button" onClick={() => go(-1)} aria-label={t.projects.prevAria}>
+            <Icon name="chevronLeft" size={24} />
+          </button>
+        )}
+        <div className="projects-grid" style={visibleProjects.length === 1 ? { gridTemplateColumns: 'minmax(0, 380px)', justifyContent: 'center' } : undefined}>
           {visibleProjects.map((project) => (
             <article className={`project-card ${revealed ? 'is-visible' : ''}`} key={project.id}>
               <div className="project-image-wrap">
@@ -234,22 +234,26 @@ function Projects({ openContact, t }) {
             </article>
           ))}
         </div>
-        <button className="carousel-arrow carousel-next" type="button" onClick={() => go(1)} aria-label={t.projects.nextAria}>
-          <Icon name="chevronRight" size={24} />
-        </button>
+        {projects.length > 1 && (
+          <button className="carousel-arrow carousel-next" type="button" onClick={() => go(1)} aria-label={t.projects.nextAria}>
+            <Icon name="chevronRight" size={24} />
+          </button>
+        )}
       </div>
 
-      <div className="carousel-dots" aria-label={t.projects.dotsAria}>
-        {projects.map((project, index) => (
-          <button
-            className={index === active ? 'dot-active' : ''}
-            type="button"
-            key={project.id}
-            onClick={() => setActive(index)}
-            aria-label={t.projects.showAria(project.title)}
-          />
-        ))}
-      </div>
+      {projects.length > 1 && (
+        <div className="carousel-dots" aria-label={t.projects.dotsAria}>
+          {projects.map((project, index) => (
+            <button
+              className={index === active ? 'dot-active' : ''}
+              type="button"
+              key={project.id}
+              onClick={() => setActive(index)}
+              aria-label={t.projects.showAria(project.title)}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
@@ -413,6 +417,7 @@ function ServiceModal({ service, onClose, onRequest, t }) {
 
 function ContactModal({ open, onClose, t, plan }) {
   const [sent, setSent] = useState(false);
+  const [waLink, setWaLink] = useState(contact.whatsappLink);
 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : '';
@@ -426,6 +431,14 @@ function ContactModal({ open, onClose, t, plan }) {
 
   const submit = (event) => {
     event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const summary = t.modal.whatsappSummary(
+      data.get('name'),
+      data.get('email'),
+      data.get('project'),
+      data.get('message'),
+    );
+    setWaLink(`${contact.whatsappLink}?text=${encodeURIComponent(summary)}`);
     setSent(true);
   };
 
@@ -443,7 +456,10 @@ function ContactModal({ open, onClose, t, plan }) {
             <span>✓</span>
             <h3>{t.modal.successTitle}</h3>
             <p>{t.modal.successText}</p>
-            <button className="gold-button" type="button" onClick={onClose}>{t.modal.successClose}</button>
+            <a className="gold-button" href={waLink} target="_blank" rel="noreferrer">
+              <Icon name="whatsapp" size={17} /> {t.modal.successWhatsapp}
+            </a>
+            <button className="text-close" type="button" onClick={onClose}>{t.modal.successClose}</button>
           </div>
         ) : (
           <form onSubmit={submit}>
@@ -524,6 +540,15 @@ function App() {
         <CallToAction openContact={openContact} t={t} />
       </main>
       <Footer openContact={openContact} t={t} />
+      <a
+        className="mobile-whatsapp-fab"
+        href={contact.whatsappLink}
+        target="_blank"
+        rel="noreferrer"
+        aria-label={t.hero.social.whatsapp}
+      >
+        <Icon name="whatsapp" size={24} />
+      </a>
       <ServiceModal service={activeService} onClose={() => setActiveService(null)} onRequest={requestFromService} t={t} />
       <ContactModal open={contactOpen} onClose={() => setContactOpen(false)} t={t} plan={contactPlan} />
     </>
