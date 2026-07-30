@@ -101,6 +101,15 @@ export const translations = {
       dotsAria: 'Seleccionar proyecto',
       showAria: (title) => `Mostrar ${title}`,
     },
+    about: {
+      label: 'Sobre mí',
+      headingLine1: 'El nombre detrás de',
+      headingLine2: 'cada línea de código.',
+      name: 'Richard Mota Torres',
+      role: 'Fundador de Pycrafted',
+      bio: 'Diseño y construyo cada proyecto yo mismo, de principio a fin — sin subcontratar, sin plantillas, sin intermediarios. Cuando hablas conmigo, hablas directamente con quien va a construir tu web.',
+      photoAlt: 'Richard Mota Torres, fundador de Pycrafted',
+    },
     process: {
       label: 'Mi proceso',
       headingLine1: 'Así convierto tus ideas',
@@ -129,6 +138,11 @@ export const translations = {
           title: 'Hosting en servidor privado',
           text: 'Tu web vive en mi propio servidor, con backups automáticos, actualizaciones y soporte incluido — y si algún día quieres migrar, te ayudo a hacerlo sin complicaciones.',
         },
+        {
+          icon: 'monitor',
+          title: 'Sigue el progreso en vivo',
+          text: 'Desde el primer día tienes un link para ver cómo avanza tu web, en tiempo real — nada de esperar a ciegas.',
+        },
       ],
       from: 'Desde',
       unit: 'pago único, en USD',
@@ -142,6 +156,7 @@ export const translations = {
           tagline: 'Tu presencia digital, lista para generar tus primeros contactos.',
           features: [
             'Landing page o pocas secciones',
+            'Entrega en 1 semana',
             'Diseño 100% responsive',
             'Formulario de contacto conectado a tu correo o WhatsApp',
             'SEO básico y carga rápida',
@@ -153,6 +168,7 @@ export const translations = {
           tagline: 'Para marcas que quieren verse (y vender) como líderes de su sector.',
           features: [
             'Múltiples páginas y secciones a medida',
+            'Entrega en 2 semanas',
             'Animaciones y efectos de movimiento',
             'Diseño 100% personalizado',
             'SEO avanzado + integración con WhatsApp/redes',
@@ -164,6 +180,7 @@ export const translations = {
           tagline: 'Plataformas propias, con tus reglas y tus datos.',
           features: [
             'Todo lo del plan Profesional',
+            'Entrega en 2 semanas',
             'Sistema de login y áreas privadas',
             'Base de datos y panel de administración',
             'Funcionalidades a medida (e-commerce, dashboards...)',
@@ -285,6 +302,15 @@ export const translations = {
       dotsAria: 'Select project',
       showAria: (title) => `Show ${title}`,
     },
+    about: {
+      label: 'About me',
+      headingLine1: 'The name behind',
+      headingLine2: 'every line of code.',
+      name: 'Richard Mota Torres',
+      role: 'Founder of Pycrafted',
+      bio: "I design and build every project myself, start to finish — no subcontracting, no templates, no middlemen. When you talk to me, you're talking directly to the person who'll build your site.",
+      photoAlt: 'Richard Mota Torres, founder of Pycrafted',
+    },
     process: {
       label: 'My process',
       headingLine1: 'This is how I turn your ideas',
@@ -313,6 +339,11 @@ export const translations = {
           title: 'Hosted on a private server',
           text: "Your site runs on my own server, with automatic backups, updates, and support included — and if you ever want to migrate, I'll help you do it hassle-free.",
         },
+        {
+          icon: 'monitor',
+          title: 'Track progress live',
+          text: "From day one you get a link to watch your site come together in real time — no waiting in the dark.",
+        },
       ],
       from: 'Starting at',
       unit: 'one-time investment (USD)',
@@ -326,6 +357,7 @@ export const translations = {
           tagline: 'Your digital presence, ready to generate your first leads.',
           features: [
             'Landing page or a few sections',
+            'Delivered in 1 week',
             'Fully responsive design',
             'Contact form connected to your email or WhatsApp',
             'Basic SEO and fast loading',
@@ -337,6 +369,7 @@ export const translations = {
           tagline: 'For brands that want to look — and sell — like leaders in their space.',
           features: [
             'Multiple pages and custom sections',
+            'Delivered in 2 weeks',
             'Animations and motion effects',
             '100% custom design',
             'Advanced SEO + WhatsApp/social integration',
@@ -348,6 +381,7 @@ export const translations = {
           tagline: 'Your own platform, on your rules, with your data.',
           features: [
             'Everything in the Professional plan',
+            'Delivered in 2 weeks',
             'Login system and private areas',
             'Database and admin panel',
             'Custom functionality (e-commerce, dashboards...)',

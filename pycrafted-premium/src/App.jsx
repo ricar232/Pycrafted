@@ -258,12 +258,29 @@ function Projects({ openContact, t }) {
   );
 }
 
+function About({ t }) {
+  return (
+    <section className="about-section container" id="sobre-mi">
+      <div className="about-photo-wrap">
+        <img className="about-photo" src="/assets/founder.jpg" alt={t.about.photoAlt} />
+      </div>
+      <div className="about-copy">
+        <p className="section-label">{t.about.label}</p>
+        <h2>{t.about.headingLine1}<br />{t.about.headingLine2}</h2>
+        <p className="about-name">{t.about.name}</p>
+        <p className="about-role">{t.about.role}</p>
+        <p className="about-bio">{t.about.bio}</p>
+      </div>
+    </section>
+  );
+}
+
 function Process({ t }) {
   return (
     <section className="process-section" id="proceso">
       <div className="process-overlay" />
       <div className="container process-inner">
-        <div className="process-intro" id="sobre-mi">
+        <div className="process-intro">
           <p className="section-label">{t.process.label}</p>
           <h2>{t.process.headingLine1}<br />{t.process.headingLine2}<br /><em>{t.process.headingEm}</em></h2>
         </div>
@@ -535,6 +552,7 @@ function App() {
         <Hero openContact={openContact} t={t} />
         <Services openDetails={setActiveService} t={t} />
         <Projects openContact={openContact} t={t} />
+        <About t={t} />
         <Process t={t} />
         <Pricing openContact={openContact} t={t} />
         <CallToAction openContact={openContact} t={t} />
