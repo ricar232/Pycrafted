@@ -145,8 +145,8 @@ body::before {
 .project-details { min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 13px 14px; border-top: 1px solid var(--line); background: #121516; }
 .project-details h3 { margin: 0; font-size: 13px; font-weight: 600; }
 .project-details p { margin: 4px 0 0; color: #929593; font-size: 11px; }
-.project-details button { width: 27px; height: 27px; display: grid; place-items: center; border: 1px solid rgba(220,174,74,.25); border-radius: 4px; color: var(--gold); background: transparent; cursor: pointer; transition: .2s ease; }
-.project-details button:hover { background: var(--gold); color: #090805; }
+.project-details button, .project-details a { width: 27px; height: 27px; display: grid; place-items: center; border: 1px solid rgba(220,174,74,.25); border-radius: 4px; color: var(--gold); background: transparent; cursor: pointer; transition: .2s ease; }
+.project-details button:hover, .project-details a:hover { background: var(--gold); color: #090805; }
 .carousel-arrow { position: absolute; z-index: 5; top: 48%; width: 43px; height: 43px; display: grid; place-items: center; border: 1px solid rgba(220,174,74,.62); border-radius: 50%; color: var(--gold); background: rgba(4,6,7,.82); cursor: pointer; transition: .25s ease; }
 .carousel-arrow:hover { color: #090805; background: var(--gold); transform: scale(1.05); }
 .carousel-prev { left: -18px; }.carousel-next { right: -18px; }
@@ -368,8 +368,14 @@ body::before {
   .cta-crystal { position: absolute; inset: 0; z-index: 0; grid-row: auto; margin: 0; background: linear-gradient(180deg, rgba(9,11,12,.3) 0%, rgba(9,11,12,.82) 62%, #090b0c 100%), url('/assets/gold-crystal.jpg') center / cover no-repeat; }
   .cta-copy { position: relative; z-index: 1; margin-top: 0; padding: 210px 26px 0; }
   .cta-button { position: relative; z-index: 1; grid-column: auto; justify-self: center; width: calc(100% - 52px); margin: 22px 0 30px; }
-  .footer { grid-template-columns: 1fr 1fr; gap: 40px 25px; }
+  .footer { grid-template-columns: 1fr; gap: 38px; text-align: center; padding-top: 44px; }
   .footer-brand, .footer-social { grid-column: 1 / -1; }
+  .footer-brand { display: flex; flex-direction: column; align-items: center; }
+  .footer-brand p { margin-inline: auto; }
+  .footer-column { justify-items: center; }
+  .footer-column a, .footer-column button { margin-inline: auto; }
+  .footer-social { display: flex; flex-direction: column; align-items: center; }
+  .footer-social > div { justify-content: center; }
   .contact-modal { padding: 38px 22px 25px; }
   .form-row { grid-template-columns: 1fr; }
   .pricing-heading { margin-bottom: 40px; }

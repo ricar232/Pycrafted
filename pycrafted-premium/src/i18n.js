@@ -12,7 +12,7 @@ export function detectLang() {
 export const serviceIcons = ['monitor', 'bag', 'pen', 'rocket', 'shield'];
 
 export const projectAssets = [
-  { id: 'rmtsolution', image: '/assets/project-rmtsolution.jpg' },
+  { id: 'rmtsolution', image: '/assets/project-rmtsolution.jpg', url: 'https://rmtsolution.com' },
 ];
 
 export const navTargets = ['inicio', 'servicios', 'proyectos', 'precios', 'sobre-mi', 'proceso', 'contacto'];

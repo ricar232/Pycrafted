@@ -229,7 +229,7 @@ function Projects({ openContact, t }) {
               </div>
               <div className="project-details">
                 <div><h3>{project.title}</h3><p>{project.category}</p></div>
-                <button type="button" onClick={() => openContact()} aria-label={t.projects.openAria(project.title)}><Icon name="external" size={14} /></button>
+                <a href={project.url} target="_blank" rel="noreferrer" aria-label={t.projects.openAria(project.title)}><Icon name="external" size={14} /></a>
               </div>
             </article>
           ))}
