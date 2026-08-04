@@ -547,7 +547,10 @@ function App() {
   return (
     <>
       <div className="site-bg-video" aria-hidden="true">
-        <video autoPlay muted loop playsInline preload="auto" src="/assets/fondo.mp4" />
+        <video autoPlay muted loop playsInline preload="auto">
+          <source src="/assets/fondo.webm" type="video/webm" />
+          <source src="/assets/fondo.mp4" type="video/mp4" />
+        </video>
       </div>
       <Particles />
       <Header menuOpen={menuOpen} setMenuOpen={setMenuOpen} openContact={openContact} t={t} />
