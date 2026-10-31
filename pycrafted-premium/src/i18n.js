@@ -12,7 +12,8 @@ export function detectLang() {
 export const serviceIcons = ['monitor', 'bag', 'pen', 'rocket', 'shield'];
 
 export const projectAssets = [
-  { id: 'rmtsolution', image: '/assets/project-rmtsolution.jpg', url: 'https://rmtsolution.com' },
+  { id: 'rmtsolution', image: '/assets/project-rmtsolution-v2.jpg', url: 'https://rmtsolution.com' },
+  { id: 'tarjeta-rmt', image: '/assets/project-tarjeta-rmt.jpg', url: 'https://tarjeta.rmtsolution.com' },
 ];
 
 export const navTargets = ['inicio', 'servicios', 'proyectos', 'precios', 'sobre-mi', 'proceso', 'contacto'];
@@ -93,6 +94,7 @@ export const translations = {
       viewAll: 'Quiero un proyecto así',
       items: [
         { title: 'RMT Solution', category: 'Sitio Web' },
+        { title: 'RMT Solutions', category: 'Tarjeta de presentación digital' },
       ],
       previewAlt: (title) => `Vista previa de ${title}`,
       openAria: (title) => `Abrir ${title}`,
@@ -294,6 +296,7 @@ export const translations = {
       viewAll: 'Start something like this',
       items: [
         { title: 'RMT Solution', category: 'Website' },
+        { title: 'RMT Solutions', category: 'Digital business card' },
       ],
       previewAlt: (title) => `Preview of ${title}`,
       openAria: (title) => `Open ${title}`,

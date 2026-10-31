@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { detectLang, translations, serviceIcons, projectAssets, navTargets, contact } from './i18n';
-import Particles from './Particles';
 
 function Icon({ name, size = 22 }) {
   const base = {
@@ -55,21 +54,43 @@ function Logo({ compact = false, t }) {
 
 function Header({ menuOpen, setMenuOpen, openContact, t }) {
   const [scrolled, setScrolled] = useState(false);
+  const [activeTarget, setActiveTarget] = useState(navTargets[0]);
+  const progressRef = useRef(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 30);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 30);
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (progressRef.current) progressRef.current.style.transform = `scaleX(${max > 0 ? window.scrollY / max : 0})`;
+    };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Resalta en el menú la sección que está en el centro de la pantalla
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) setActiveTarget(entry.target.id);
+      });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    navTargets.forEach((target) => {
+      const el = document.getElementById(target);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
+
   return (
+    <>
+    <div className="scroll-progress" ref={progressRef} aria-hidden="true" />
     <header className={`topbar ${scrolled ? 'topbar-scrolled' : ''}`}>
       <Logo t={t} />
       <nav className={`main-nav ${menuOpen ? 'main-nav-open' : ''}`} aria-label={t.navAria}>
         {navTargets.map((target, index) => (
           <a
-            className={index === 0 ? 'nav-active' : ''}
+            className={target === activeTarget ? 'nav-active' : ''}
             href={`#${target}`}
             key={target}
             onClick={() => setMenuOpen(false)}
@@ -90,6 +111,7 @@ function Header({ menuOpen, setMenuOpen, openContact, t }) {
         <Icon name={menuOpen ? 'close' : 'menu'} size={24} />
       </button>
     </header>
+    </>
   );
 }
 
@@ -108,12 +130,12 @@ function Hero({ openContact, t }) {
   return (
     <section className="hero" id="inicio" onPointerMove={onPointerMove} onPointerLeave={() => setPosition({ x: 0, y: 0 })}>
       <div className="container hero-grid">
-        <div className="hero-copy reveal-on-load">
+        <div className="hero-copy">
           <p className="eyebrow">{t.hero.eyebrow}</p>
           <h1>
-            {t.hero.titleLine1}
-            <span> {t.hero.titleEm}</span>
-            {t.hero.titleLine2}
+            <span className="hero-line" style={{ '--i': 0 }}><span>{t.hero.titleLine1}</span></span>
+            <span className="hero-line hero-em" style={{ '--i': 1 }}><span>{t.hero.titleEm}</span></span>
+            <span className="hero-line" style={{ '--i': 2 }}><span>{t.hero.titleLine2}</span></span>
           </h1>
           <p className="hero-description">{t.hero.description}</p>
           <div className="hero-actions">
@@ -127,11 +149,11 @@ function Hero({ openContact, t }) {
         </div>
 
         <div className="hero-art-wrap" aria-label={t.hero.sculptureAria}>
+          <div className="hero-art-glow" />
           <div
             className="hero-art"
             style={{ transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(1.035)` }}
           />
-          <div className="hero-art-glow" />
         </div>
       </div>
 
@@ -150,7 +172,7 @@ function Services({ openDetails, t }) {
   return (
     <section className="services-shell container" id="servicios">
       {items.map((service) => (
-        <article className="service-card" key={service.title}>
+        <article className="service-card spotlight" key={service.title}>
           <Icon name={service.icon} size={30} />
           <h2>{service.title}</h2>
           <p>{service.description}</p>
@@ -161,6 +183,58 @@ function Services({ openDetails, t }) {
       ))}
     </section>
   );
+}
+
+function Marquee({ t }) {
+  const items = t.services.items.map((service) => service.title);
+  // La lista se duplica para que el desplazamiento sea continuo
+  return (
+    <div className="marquee" aria-hidden="true">
+      <div className="marquee-track">
+        {[...items, ...items].map((title, index) => (
+          <span className={`marquee-item ${(index % items.length) % 2 ? 'marquee-outline' : ''}`} key={index}>
+            {title}<i className="marquee-star">✦</i>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CountUp({ value }) {
+  const ref = useRef(null);
+  const target = Number(String(value).replace(/[^\d]/g, ''));
+  const format = (n) => n.toLocaleString(String(value).includes('.') ? 'de-DE' : 'en-US');
+  const [display, setDisplay] = useState(format(0));
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setDisplay(format(target));
+      return undefined;
+    }
+    let frame;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      observer.disconnect();
+      const start = performance.now();
+      const tick = (now) => {
+        const progress = Math.min((now - start) / 1400, 1);
+        const eased = 1 - (1 - progress) ** 3;
+        setDisplay(format(Math.round(target * eased)));
+        if (progress < 1) frame = requestAnimationFrame(tick);
+      };
+      frame = requestAnimationFrame(tick);
+    }, { threshold: 0.6 });
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }, [target]);
+
+  return <span ref={ref}>{display}</span>;
 }
 
 function Projects({ openContact, t }) {
@@ -204,7 +278,7 @@ function Projects({ openContact, t }) {
 
   return (
     <section className="projects-section container" id="proyectos" ref={sectionRef}>
-      <div className="projects-heading">
+      <div className="projects-heading reveal">
         <div>
           <p className="section-label">{t.projects.label}</p>
           <h2>{t.projects.headingLine1}<br />{t.projects.headingLine2}</h2>
@@ -220,9 +294,9 @@ function Projects({ openContact, t }) {
             <Icon name="chevronLeft" size={24} />
           </button>
         )}
-        <div className="projects-grid" style={visibleProjects.length === 1 ? { gridTemplateColumns: 'minmax(0, 380px)', justifyContent: 'center' } : undefined}>
+        <div className={`projects-grid ${visibleProjects.length < 4 ? 'projects-grid-few' : ''}`} style={{ '--n': visibleProjects.length }}>
           {visibleProjects.map((project) => (
-            <article className={`project-card ${revealed ? 'is-visible' : ''}`} key={project.id}>
+            <article className={`project-card spotlight ${revealed ? 'is-visible' : ''}`} key={project.id}>
               <div className="project-image-wrap">
                 <img src={project.image} alt={t.projects.previewAlt(project.title)} />
                 <div className="project-shine" />
@@ -260,7 +334,7 @@ function Projects({ openContact, t }) {
 
 function About({ t }) {
   return (
-    <section className="about-section container" id="sobre-mi">
+    <section className="about-section container reveal" id="sobre-mi">
       <div className="about-photo-wrap">
         <img className="about-photo" src="/assets/founder.jpg" alt={t.about.photoAlt} />
       </div>
@@ -280,7 +354,7 @@ function Process({ t }) {
     <section className="process-section" id="proceso">
       <div className="process-overlay" />
       <div className="container process-inner">
-        <div className="process-intro">
+        <div className="process-intro reveal">
           <p className="section-label">{t.process.label}</p>
           <h2>{t.process.headingLine1}<br />{t.process.headingLine2}<br /><em>{t.process.headingEm}</em></h2>
         </div>
@@ -301,13 +375,13 @@ function Process({ t }) {
 function Pricing({ openContact, t }) {
   return (
     <section className="pricing-section container" id="precios">
-      <div className="pricing-heading">
+      <div className="pricing-heading reveal">
         <p className="section-label">{t.pricing.label}</p>
         <h2>{t.pricing.headingLine1}<br />{t.pricing.headingLine2}</h2>
         <p className="pricing-intro">{t.pricing.intro}</p>
       </div>
 
-      <div className="pricing-highlights">
+      <div className="pricing-highlights reveal">
         {t.pricing.highlights.map((item) => (
           <div className="pricing-highlight" key={item.title}>
             <Icon name={item.icon} size={22} />
@@ -323,13 +397,13 @@ function Pricing({ openContact, t }) {
         {t.pricing.tiers.map((tier, index) => {
           const featured = index === 1;
           return (
-            <article className={`pricing-card ${featured ? 'pricing-featured' : ''}`} key={tier.name}>
+            <article className={`pricing-card spotlight ${featured ? 'pricing-featured' : ''}`} key={tier.name}>
               {featured && <span className="pricing-badge">{t.pricing.featuredBadge}</span>}
               <h3>{tier.name}</h3>
               <p className="pricing-tagline">{tier.tagline}</p>
               <div className="pricing-price">
                 <span className="pricing-from">{t.pricing.from}</span>
-                <span className="pricing-amount">${tier.price}</span>
+                <span className="pricing-amount">$<CountUp value={tier.price} /></span>
               </div>
               <p className="pricing-unit">{t.pricing.unit}</p>
               <ul className="pricing-features">
@@ -372,7 +446,7 @@ function CallToAction({ openContact, t }) {
 
 function Footer({ openContact, t }) {
   return (
-    <footer className="footer container">
+    <footer className="footer container reveal">
       <div className="footer-brand">
         <Logo t={t} />
         <p>{t.footer.tagline}</p>
@@ -521,8 +595,33 @@ function App() {
     if (meta) meta.setAttribute('content', t.meta.description);
   }, [lang, t]);
 
+  // Foco de luz e inclinación 3D que siguen al cursor sobre las tarjetas
   useEffect(() => {
-    const elements = document.querySelectorAll('.service-card, .process-step, .pricing-card, .cta-shell');
+    if (window.matchMedia('(pointer: coarse)').matches) return undefined;
+    let current = null;
+    const reset = (el) => {
+      el.style.removeProperty('--rx');
+      el.style.removeProperty('--ry');
+    };
+    const onMove = (event) => {
+      const el = event.target.closest?.('.spotlight');
+      if (current && current !== el) reset(current);
+      current = el;
+      if (!el) return;
+      const box = el.getBoundingClientRect();
+      const x = (event.clientX - box.left) / box.width;
+      const y = (event.clientY - box.top) / box.height;
+      el.style.setProperty('--mx', `${x * 100}%`);
+      el.style.setProperty('--my', `${y * 100}%`);
+      el.style.setProperty('--rx', `${(0.5 - y) * 7}deg`);
+      el.style.setProperty('--ry', `${(x - 0.5) * 7}deg`);
+    };
+    document.addEventListener('pointermove', onMove, { passive: true });
+    return () => document.removeEventListener('pointermove', onMove);
+  }, []);
+
+  useEffect(() => {
+    const elements = document.querySelectorAll('.service-card, .process-step, .pricing-card, .cta-shell, .reveal');
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) entry.target.classList.add('is-visible');
@@ -546,17 +645,11 @@ function App() {
 
   return (
     <>
-      <div className="site-bg-video" aria-hidden="true">
-        <video autoPlay muted loop playsInline preload="auto">
-          <source src="/assets/fondo.webm" type="video/webm" />
-          <source src="/assets/fondo.mp4" type="video/mp4" />
-        </video>
-      </div>
-      <Particles />
       <Header menuOpen={menuOpen} setMenuOpen={setMenuOpen} openContact={openContact} t={t} />
       <main>
         <Hero openContact={openContact} t={t} />
         <Services openDetails={setActiveService} t={t} />
+        <Marquee t={t} />
         <Projects openContact={openContact} t={t} />
         <About t={t} />
         <Process t={t} />
