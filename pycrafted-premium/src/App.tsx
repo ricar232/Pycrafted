@@ -1,8 +1,28 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { CSSProperties, Dispatch, FormEvent, PointerEvent, ReactNode, SetStateAction, SVGProps } from 'react';
 import { detectLang, translations, serviceIcons, projectAssets, navTargets, contact } from './i18n';
+import type { IconName, ServiceText, Translation } from './i18n';
 
-function Icon({ name, size = 22 }) {
-  const base = {
+/** Permite usar variables CSS (--i, --n...) en la prop `style`. */
+type CSSVars = CSSProperties & Record<`--${string}`, string | number>;
+
+type OpenContact = (planName?: string, planPrice?: string) => void;
+
+interface WithT {
+  t: Translation;
+}
+
+interface Service extends ServiceText {
+  icon: IconName;
+}
+
+interface ContactPlan {
+  name: string;
+  price?: string;
+}
+
+function Icon({ name, size = 22 }: { name: IconName; size?: number }) {
+  const base: SVGProps<SVGSVGElement> = {
     width: size,
     height: size,
     viewBox: '0 0 24 24',
@@ -14,7 +34,7 @@ function Icon({ name, size = 22 }) {
     'aria-hidden': true,
   };
 
-  const shapes = {
+  const shapes: Record<IconName, ReactNode> = {
     arrow: <><path d="M5 12h14" /><path d="m14 7 5 5-5 5" /></>,
     grid: <><circle cx="6" cy="6" r="1" /><circle cx="12" cy="6" r="1" /><circle cx="18" cy="6" r="1" /><circle cx="6" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="18" cy="12" r="1" /><circle cx="6" cy="18" r="1" /><circle cx="12" cy="18" r="1" /><circle cx="18" cy="18" r="1" /></>,
     monitor: <><rect x="3" y="4" width="18" height="12" rx="1.8" /><path d="M8 20h8" /><path d="M12 16v4" /></>,
@@ -43,7 +63,7 @@ function Icon({ name, size = 22 }) {
   return <svg {...base}>{shapes[name]}</svg>;
 }
 
-function Logo({ compact = false, t }) {
+function Logo({ compact = false, t }: WithT & { compact?: boolean }) {
   return (
     <a className={`brand ${compact ? 'brand-compact' : ''}`} href="#inicio" aria-label={t.logoAria}>
       <img className="brand-mark" src="/assets/logo-gold.png" alt="" />
@@ -52,10 +72,16 @@ function Logo({ compact = false, t }) {
   );
 }
 
-function Header({ menuOpen, setMenuOpen, openContact, t }) {
+interface HeaderProps extends WithT {
+  menuOpen: boolean;
+  setMenuOpen: Dispatch<SetStateAction<boolean>>;
+  openContact: OpenContact;
+}
+
+function Header({ menuOpen, setMenuOpen, openContact, t }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
-  const [activeTarget, setActiveTarget] = useState(navTargets[0]);
-  const progressRef = useRef(null);
+  const [activeTarget, setActiveTarget] = useState<string>(navTargets[0]);
+  const progressRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => {
@@ -115,10 +141,10 @@ function Header({ menuOpen, setMenuOpen, openContact, t }) {
   );
 }
 
-function Hero({ openContact, t }) {
+function Hero({ t }: WithT) {
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
-  const onPointerMove = (event) => {
+  const onPointerMove = (event: PointerEvent<HTMLElement>) => {
     if (window.matchMedia('(pointer: coarse)').matches) return;
     const box = event.currentTarget.getBoundingClientRect();
     setPosition({
@@ -133,9 +159,9 @@ function Hero({ openContact, t }) {
         <div className="hero-copy">
           <p className="eyebrow">{t.hero.eyebrow}</p>
           <h1>
-            <span className="hero-line" style={{ '--i': 0 }}><span>{t.hero.titleLine1}</span></span>
-            <span className="hero-line hero-em" style={{ '--i': 1 }}><span>{t.hero.titleEm}</span></span>
-            <span className="hero-line" style={{ '--i': 2 }}><span>{t.hero.titleLine2}</span></span>
+            <span className="hero-line" style={{ '--i': 0 } as CSSVars}><span>{t.hero.titleLine1}</span></span>
+            <span className="hero-line hero-em" style={{ '--i': 1 } as CSSVars}><span>{t.hero.titleEm}</span></span>
+            <span className="hero-line" style={{ '--i': 2 } as CSSVars}><span>{t.hero.titleLine2}</span></span>
           </h1>
           <p className="hero-description">{t.hero.description}</p>
           <div className="hero-actions">
@@ -166,14 +192,17 @@ function Hero({ openContact, t }) {
   );
 }
 
-function Services({ openDetails, t }) {
-  const items = serviceIcons.map((icon, index) => ({ icon, ...t.services.items[index] }));
+function Services({ openDetails, t }: WithT & { openDetails: (service: Service) => void }) {
+  const items: Service[] = serviceIcons.map((icon, index) => ({ icon, ...t.services.items[index] }));
 
   return (
     <section className="services-shell container" id="servicios">
-      {items.map((service) => (
-        <article className="service-card spotlight" key={service.title}>
-          <Icon name={service.icon} size={30} />
+      {/* Un haz de luz recorre el borde de cada tarjeta, una tras otra, de la primera a la última */}
+      {items.map((service, index) => (
+        <article className="service-card spotlight" key={service.title} style={{ '--i': index } as CSSVars}>
+          <span className="service-beam" aria-hidden="true" />
+          <span className="service-glow" aria-hidden="true" />
+          <span className="service-tile"><Icon name={service.icon} size={30} /></span>
           <h2>{service.title}</h2>
           <p>{service.description}</p>
           <button type="button" onClick={() => openDetails(service)} aria-label={t.services.detailsAria(service.title)}>
@@ -185,7 +214,7 @@ function Services({ openDetails, t }) {
   );
 }
 
-function Marquee({ t }) {
+function Marquee({ t }: WithT) {
   const items = t.services.items.map((service) => service.title);
   // La lista se duplica para que el desplazamiento sea continuo
   return (
@@ -201,10 +230,10 @@ function Marquee({ t }) {
   );
 }
 
-function CountUp({ value }) {
-  const ref = useRef(null);
-  const target = Number(String(value).replace(/[^\d]/g, ''));
-  const format = (n) => n.toLocaleString(String(value).includes('.') ? 'de-DE' : 'en-US');
+function CountUp({ value }: { value: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const target = Number(value.replace(/[^\d]/g, ''));
+  const format = (n: number) => n.toLocaleString(value.includes('.') ? 'de-DE' : 'en-US');
   const [display, setDisplay] = useState(format(0));
 
   useEffect(() => {
@@ -214,12 +243,12 @@ function CountUp({ value }) {
       setDisplay(format(target));
       return undefined;
     }
-    let frame;
+    let frame = 0;
     const observer = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return;
+      if (!entry?.isIntersecting) return;
       observer.disconnect();
       const start = performance.now();
-      const tick = (now) => {
+      const tick = (now: number) => {
         const progress = Math.min((now - start) / 1400, 1);
         const eased = 1 - (1 - progress) ** 3;
         setDisplay(format(Math.round(target * eased)));
@@ -237,10 +266,10 @@ function CountUp({ value }) {
   return <span ref={ref}>{display}</span>;
 }
 
-function Projects({ openContact, t }) {
+function Projects({ openContact, t }: WithT & { openContact: OpenContact }) {
   const [active, setActive] = useState(0);
   const [revealed, setRevealed] = useState(false);
-  const sectionRef = useRef(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const projects = useMemo(
     () => projectAssets.map((asset, index) => ({ ...asset, ...t.projects.items[index] })),
     [t],
@@ -272,7 +301,7 @@ function Projects({ openContact, t }) {
       .slice(0, visibleCount);
   }, [active, projects, visibleCount]);
 
-  const go = (direction) => {
+  const go = (direction: 1 | -1) => {
     setActive((current) => (current + direction + projects.length) % projects.length);
   };
 
@@ -294,7 +323,7 @@ function Projects({ openContact, t }) {
             <Icon name="chevronLeft" size={24} />
           </button>
         )}
-        <div className={`projects-grid ${visibleProjects.length < 4 ? 'projects-grid-few' : ''}`} style={{ '--n': visibleProjects.length }}>
+        <div className={`projects-grid ${visibleProjects.length < 4 ? 'projects-grid-few' : ''}`} style={{ '--n': visibleProjects.length } as CSSVars}>
           {visibleProjects.map((project) => (
             <article className={`project-card spotlight ${revealed ? 'is-visible' : ''}`} key={project.id}>
               <div className="project-image-wrap">
@@ -332,36 +361,62 @@ function Projects({ openContact, t }) {
   );
 }
 
-function About({ t }) {
+function About({ t }: WithT) {
   return (
     <section className="about-section container reveal" id="sobre-mi">
-      <div className="about-photo-wrap">
-        <img className="about-photo" src="/assets/founder.jpg" alt={t.about.photoAlt} />
+      {/* Tarjeta holográfica: se inclina con el cursor (clase spotlight) */}
+      <div className="about-photo-stage spotlight">
+        <div className="about-photo-wrap">
+          <span className="about-photo-beam" aria-hidden="true" />
+          <img className="about-photo" src="/assets/founder.jpg" alt={t.about.photoAlt} />
+          <span className="about-photo-scan" aria-hidden="true" />
+          <span className="about-corner about-corner-tl" aria-hidden="true" />
+          <span className="about-corner about-corner-tr" aria-hidden="true" />
+          <span className="about-corner about-corner-bl" aria-hidden="true" />
+          <span className="about-corner about-corner-br" aria-hidden="true" />
+        </div>
+        <span className="about-photo-floor" aria-hidden="true" />
       </div>
       <div className="about-copy">
         <p className="section-label">{t.about.label}</p>
         <h2>{t.about.headingLine1}<br />{t.about.headingLine2}</h2>
         <p className="about-name">{t.about.name}</p>
         <p className="about-role">{t.about.role}</p>
+        <span className="about-signal" aria-hidden="true"><span /></span>
         <p className="about-bio">{t.about.bio}</p>
       </div>
     </section>
   );
 }
 
-function Process({ t }) {
+function Process({ t }: WithT) {
   return (
     <section className="process-section" id="proceso">
-      <div className="process-overlay" />
+      <div className="process-floor" aria-hidden="true" />
       <div className="container process-inner">
         <div className="process-intro reveal">
           <p className="section-label">{t.process.label}</p>
           <h2>{t.process.headingLine1}<br />{t.process.headingLine2}<br /><em>{t.process.headingEm}</em></h2>
         </div>
+        {/* Un haz de luz recorre los pasos en orden; cada nodo se enciende cuando el haz lo alcanza */}
         <div className="process-steps">
-          {t.process.items.map((step, index) => (
-            <article className="process-step" key={step.title}>
-              <div className="process-number"><span>{String(index + 1).padStart(2, '0')}</span></div>
+          {t.process.items.map((step, index, items) => (
+            <article className="process-step" key={step.title} style={{ '--i': index } as CSSVars}>
+              {index < items.length - 1 && (
+                <span className="process-link" aria-hidden="true">
+                  <span className="process-link-fill" />
+                  <span className="process-comet" />
+                </span>
+              )}
+              <div className="process-node">
+                <span className="process-halo" aria-hidden="true" />
+                <span className="process-orbit" aria-hidden="true" />
+                {/* Estrella 3D: cara frontal y trasera facetadas + capas intermedias que forman el grosor */}
+                <div className="process-star" aria-hidden="true">
+                  <span /><span /><span /><span /><span /><span /><span />
+                </div>
+                <span className="process-number">{String(index + 1).padStart(2, '0')}</span>
+              </div>
               <h3>{step.title}</h3>
               <p>{step.text}</p>
             </article>
@@ -372,7 +427,7 @@ function Process({ t }) {
   );
 }
 
-function Pricing({ openContact, t }) {
+function Pricing({ openContact, t }: WithT & { openContact: OpenContact }) {
   return (
     <section className="pricing-section container" id="precios">
       <div className="pricing-heading reveal">
@@ -428,7 +483,7 @@ function Pricing({ openContact, t }) {
   );
 }
 
-function CallToAction({ openContact, t }) {
+function CallToAction({ openContact, t }: WithT & { openContact: OpenContact }) {
   return (
     <section className="cta-shell container" id="contacto">
       <div className="cta-crystal" />
@@ -444,7 +499,7 @@ function CallToAction({ openContact, t }) {
   );
 }
 
-function Footer({ openContact, t }) {
+function Footer({ openContact, t }: WithT & { openContact: OpenContact }) {
   return (
     <footer className="footer container reveal">
       <div className="footer-brand">
@@ -472,11 +527,19 @@ function Footer({ openContact, t }) {
   );
 }
 
-function ServiceModal({ service, onClose, onRequest, t }) {
+interface ServiceModalProps extends WithT {
+  service: Service | null;
+  onClose: () => void;
+  onRequest: () => void;
+}
+
+function ServiceModal({ service, onClose, onRequest, t }: ServiceModalProps) {
   useEffect(() => {
     if (!service) return undefined;
     document.body.style.overflow = 'hidden';
-    const onKey = (event) => event.key === 'Escape' && onClose();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
     window.addEventListener('keydown', onKey);
     return () => {
       document.body.style.overflow = '';
@@ -488,31 +551,52 @@ function ServiceModal({ service, onClose, onRequest, t }) {
 
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
-      <div className="contact-modal service-modal" role="dialog" aria-modal="true" aria-labelledby="service-title" onMouseDown={(event) => event.stopPropagation()}>
-        <button className="modal-close" type="button" onClick={onClose} aria-label={t.modal.closeAria}><Icon name="close" size={20} /></button>
-        <div className="service-modal-icon"><Icon name={service.icon} size={26} /></div>
-        <h2 id="service-title">{service.title}</h2>
-        <p className="modal-description">{service.details}</p>
-        <ul className="pricing-features service-modal-features">
-          {service.features.map((feature) => (
-            <li key={feature}><Icon name="check" size={15} />{feature}</li>
-          ))}
-        </ul>
-        <button className="gold-button modal-submit" type="button" onClick={onRequest}>
-          {t.services.cta} <Icon name="arrow" size={18} />
-        </button>
+      {/* Ventana con el mismo lenguaje que las tarjetas: haz de luz en el borde, icono 3D y foco que sigue al cursor */}
+      <div className="contact-modal service-modal spotlight" role="dialog" aria-modal="true" aria-labelledby="service-title" onMouseDown={(event) => event.stopPropagation()}>
+        <span className="service-beam" aria-hidden="true" />
+        <span className="service-glow" aria-hidden="true" />
+        <div className="service-modal-body">
+          <button className="modal-close" type="button" onClick={onClose} aria-label={t.modal.closeAria}><Icon name="close" size={20} /></button>
+          <div className="service-modal-head">
+            <span className="service-tile"><Icon name={service.icon} size={30} /></span>
+            <p className="section-label">{t.services.modalLabel}</p>
+          </div>
+          <h2 id="service-title">{service.title}</h2>
+          <span className="about-signal" aria-hidden="true"><span /></span>
+          <p className="modal-description">{service.details}</p>
+          <p className="service-modal-includes">{t.services.includesLabel}</p>
+          <ul className="service-modal-features">
+            {service.features.map((feature, index) => (
+              <li key={feature} style={{ '--i': index } as CSSVars}>
+                <span className="feature-check" aria-hidden="true"><Icon name="check" size={14} /></span>
+                {feature}
+              </li>
+            ))}
+          </ul>
+          <button className="gold-button modal-submit" type="button" onClick={onRequest}>
+            {t.services.cta} <Icon name="arrow" size={18} />
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
-function ContactModal({ open, onClose, t, plan }) {
+interface ContactModalProps extends WithT {
+  open: boolean;
+  onClose: () => void;
+  plan: ContactPlan | null;
+}
+
+function ContactModal({ open, onClose, t, plan }: ContactModalProps) {
   const [sent, setSent] = useState(false);
   const [waLink, setWaLink] = useState(contact.whatsappLink);
 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : '';
-    const onKey = (event) => event.key === 'Escape' && onClose();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
     window.addEventListener('keydown', onKey);
     return () => {
       document.body.style.overflow = '';
@@ -520,15 +604,11 @@ function ContactModal({ open, onClose, t, plan }) {
     };
   }, [open, onClose]);
 
-  const submit = (event) => {
+  const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const summary = t.modal.whatsappSummary(
-      data.get('name'),
-      data.get('email'),
-      data.get('project'),
-      data.get('message'),
-    );
+    const field = (key: string) => String(data.get(key) ?? '');
+    const summary = t.modal.whatsappSummary(field('name'), field('email'), field('project'), field('message'));
     setWaLink(`${contact.whatsappLink}?text=${encodeURIComponent(summary)}`);
     setSent(true);
   };
@@ -567,7 +647,7 @@ function ContactModal({ open, onClose, t, plan }) {
               <textarea
                 required
                 name="message"
-                rows="5"
+                rows={5}
                 placeholder={t.modal.messagePlaceholder}
                 defaultValue={plan ? (plan.price ? t.modal.planPrefill(plan.name, plan.price) : t.modal.servicePrefill(plan.name)) : ''}
               />
@@ -583,28 +663,27 @@ function ContactModal({ open, onClose, t, plan }) {
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
-  const [contactPlan, setContactPlan] = useState(null);
-  const [activeService, setActiveService] = useState(null);
+  const [contactPlan, setContactPlan] = useState<ContactPlan | null>(null);
+  const [activeService, setActiveService] = useState<Service | null>(null);
   const lang = useMemo(() => detectLang(), []);
   const t = translations[lang];
 
   useEffect(() => {
     document.documentElement.lang = lang;
     document.title = t.meta.title;
-    let meta = document.querySelector('meta[name="description"]');
+    const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute('content', t.meta.description);
   }, [lang, t]);
 
   // Foco de luz e inclinación 3D que siguen al cursor sobre las tarjetas
   useEffect(() => {
     if (window.matchMedia('(pointer: coarse)').matches) return undefined;
-    let current = null;
-    const reset = (el) => {
-      el.style.removeProperty('--rx');
-      el.style.removeProperty('--ry');
+    let current: HTMLElement | null = null;
+    const reset = (el: HTMLElement) => {
+      ['--rx', '--ry', '--px', '--py'].forEach((prop) => el.style.removeProperty(prop));
     };
-    const onMove = (event) => {
-      const el = event.target.closest?.('.spotlight');
+    const onMove = (event: globalThis.PointerEvent) => {
+      const el = event.target instanceof Element ? event.target.closest<HTMLElement>('.spotlight') : null;
       if (current && current !== el) reset(current);
       current = el;
       if (!el) return;
@@ -615,13 +694,16 @@ function App() {
       el.style.setProperty('--my', `${y * 100}%`);
       el.style.setProperty('--rx', `${(0.5 - y) * 7}deg`);
       el.style.setProperty('--ry', `${(x - 0.5) * 7}deg`);
+      // Valores sin unidad (-0.5 a 0.5) para efectos de paralaje y sombras que siguen al cursor
+      el.style.setProperty('--px', (x - 0.5).toFixed(3));
+      el.style.setProperty('--py', (y - 0.5).toFixed(3));
     };
     document.addEventListener('pointermove', onMove, { passive: true });
     return () => document.removeEventListener('pointermove', onMove);
   }, []);
 
   useEffect(() => {
-    const elements = document.querySelectorAll('.service-card, .process-step, .pricing-card, .cta-shell, .reveal');
+    const elements = document.querySelectorAll('.service-card, .process-steps, .process-step, .pricing-card, .cta-shell, .reveal');
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) entry.target.classList.add('is-visible');
@@ -631,7 +713,7 @@ function App() {
     return () => observer.disconnect();
   }, []);
 
-  const openContact = (planName, planPrice) => {
+  const openContact: OpenContact = (planName, planPrice) => {
     setContactPlan(planName ? { name: planName, price: planPrice } : null);
     setContactOpen(true);
     setMenuOpen(false);
@@ -647,7 +729,7 @@ function App() {
     <>
       <Header menuOpen={menuOpen} setMenuOpen={setMenuOpen} openContact={openContact} t={t} />
       <main>
-        <Hero openContact={openContact} t={t} />
+        <Hero t={t} />
         <Services openDetails={setActiveService} t={t} />
         <Marquee t={t} />
         <Projects openContact={openContact} t={t} />

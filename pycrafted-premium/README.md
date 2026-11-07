@@ -18,7 +18,7 @@ npm run preview
 
 ## Personalización rápida
 
-- Textos y proyectos: `src/App.jsx`
+- Textos y proyectos: `src/App.tsx` (traducciones en `src/i18n.ts`)
 - Colores, espacios y responsive: `src/styles.css`
 - Recursos visuales: `public/assets/`
 - Formulario: actualmente valida y muestra confirmación visual. Conéctalo a Formspree, Resend, EmailJS o tu API para enviar mensajes reales.

@@ -1,4 +1,136 @@
-export function detectLang() {
+export type Lang = 'es' | 'en';
+
+export type IconName =
+  | 'arrow' | 'grid' | 'monitor' | 'bag' | 'pen' | 'rocket' | 'shield' | 'close' | 'menu'
+  | 'external' | 'chevronLeft' | 'chevronRight' | 'play' | 'mail' | 'check' | 'whatsapp';
+
+export type NavTarget = 'inicio' | 'servicios' | 'proyectos' | 'precios' | 'sobre-mi' | 'proceso' | 'contacto';
+
+export interface ServiceText {
+  title: string;
+  description: string;
+  details: string;
+  features: string[];
+}
+
+export interface PricingTier {
+  name: string;
+  price: string;
+  tagline: string;
+  features: string[];
+}
+
+export interface Translation {
+  code: Lang;
+  meta: { title: string; description: string };
+  nav: string[];
+  navAria: string;
+  socialAria: string;
+  talk: string;
+  menuAria: { open: string; close: string };
+  logoAria: string;
+  hero: {
+    eyebrow: string;
+    titleLine1: string;
+    titleEm: string;
+    titleLine2: string;
+    description: string;
+    ctaProjects: string;
+    ctaServices: string;
+    clientsLine1: string;
+    clientsLine2: string;
+    sculptureAria: string;
+    social: { play: string; whatsapp: string; mail: string };
+  };
+  services: {
+    items: ServiceText[];
+    detailsAria: (title: string) => string;
+    modalLabel: string;
+    includesLabel: string;
+    cta: string;
+  };
+  projects: {
+    label: string;
+    headingLine1: string;
+    headingLine2: string;
+    viewAll: string;
+    items: { title: string; category: string }[];
+    previewAlt: (title: string) => string;
+    openAria: (title: string) => string;
+    prevAria: string;
+    nextAria: string;
+    dotsAria: string;
+    showAria: (title: string) => string;
+  };
+  about: {
+    label: string;
+    headingLine1: string;
+    headingLine2: string;
+    name: string;
+    role: string;
+    bio: string;
+    photoAlt: string;
+  };
+  process: {
+    label: string;
+    headingLine1: string;
+    headingLine2: string;
+    headingEm: string;
+    items: { title: string; text: string }[];
+  };
+  pricing: {
+    label: string;
+    headingLine1: string;
+    headingLine2: string;
+    intro: string;
+    highlights: { icon: IconName; title: string; text: string }[];
+    from: string;
+    unit: string;
+    featuredBadge: string;
+    cta: string;
+    note: string;
+    tiers: PricingTier[];
+  };
+  cta: { label: string; heading: string; text: string; button: string };
+  footer: {
+    tagline: string;
+    links: string;
+    contact: string;
+    servicesTitle: string;
+    followMe: string;
+    rights: (year: number) => string;
+  };
+  modal: {
+    label: string;
+    heading: string;
+    description: string;
+    closeAria: string;
+    nameLabel: string;
+    namePlaceholder: string;
+    emailLabel: string;
+    emailPlaceholder: string;
+    typeLabel: string;
+    typeOptions: string[];
+    messageLabel: string;
+    messagePlaceholder: string;
+    planPrefill: (plan: string, price: string) => string;
+    servicePrefill: (service: string) => string;
+    whatsappSummary: (name: string, email: string, project: string, message: string) => string;
+    submit: string;
+    successTitle: string;
+    successText: string;
+    successWhatsapp: string;
+    successClose: string;
+  };
+}
+
+export interface ProjectAsset {
+  id: string;
+  image: string;
+  url: string;
+}
+
+export function detectLang(): Lang {
   if (typeof navigator === 'undefined') return 'es';
   const candidates = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || 'es'];
   for (const candidate of candidates) {
@@ -9,14 +141,14 @@ export function detectLang() {
   return 'es';
 }
 
-export const serviceIcons = ['monitor', 'bag', 'pen', 'rocket', 'shield'];
+export const serviceIcons: IconName[] = ['monitor', 'bag', 'pen', 'rocket', 'shield'];
 
-export const projectAssets = [
+export const projectAssets: ProjectAsset[] = [
   { id: 'rmtsolution', image: '/assets/project-rmtsolution-v2.jpg', url: 'https://rmtsolution.com' },
   { id: 'tarjeta-rmt', image: '/assets/project-tarjeta-rmt.jpg', url: 'https://tarjeta.rmtsolution.com' },
 ];
 
-export const navTargets = ['inicio', 'servicios', 'proyectos', 'precios', 'sobre-mi', 'proceso', 'contacto'];
+export const navTargets: NavTarget[] = ['inicio', 'servicios', 'proyectos', 'precios', 'sobre-mi', 'proceso', 'contacto'];
 
 export const contact = {
   whatsappNumber: '13528143988',
@@ -25,7 +157,7 @@ export const contact = {
   mailLink: 'mailto:motatorresrichard@gmail.com',
 };
 
-export const translations = {
+export const translations: Record<Lang, Translation> = {
   es: {
     code: 'es',
     meta: {
@@ -86,6 +218,8 @@ export const translations = {
       ],
       detailsAria: (title) => `Ver más sobre ${title}`,
       cta: 'Solicitar este servicio',
+      modalLabel: 'Servicio',
+      includesLabel: 'Qué incluye',
     },
     projects: {
       label: 'Proyectos destacados',
@@ -288,6 +422,8 @@ export const translations = {
       ],
       detailsAria: (title) => `See more about ${title}`,
       cta: 'Request this service',
+      modalLabel: 'Service',
+      includesLabel: "What's included",
     },
     projects: {
       label: 'Featured projects',
